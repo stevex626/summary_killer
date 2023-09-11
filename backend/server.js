@@ -7,6 +7,10 @@ require('dotenv').config();
 
 const app = express();
 
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY // Using the official initialization pattern
+});
+
 // Load environment variables
 openai.api_key = process.env.OPENAI_API_KEY;
 
@@ -51,20 +55,30 @@ app.post('/summarize', async (req, res) => {
 
         if (!truncatedText) return res.status(400).json({ error: "Failed to extract meaningful content" });
 
-        const openaiResponse = await openai.Completion.create({
-            engine: "text-davinci-003",
-            prompt: `Please summarize the following content:\n${truncatedText}`,
-            max_tokens: 200
+        const openaiResponse = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [{
+                role: 'system',
+                content: `You are a helpful assistant.`
+            }, {
+                role: 'user',
+                content: `Please summarize the following content: ${truncatedText}`
+            }]
         });
 
-        const summary = openaiResponse.choices[0].text.trim();
+        const summary = openaiResponse.choices[0]?.message?.content?.trim();
 
         res.json({ summary });
 
     } catch (error) {
-        res.status(500).json({ error: `Failed due to: ${error.message}` });
+        if (error instanceof OpenAI.APIError) {
+            res.status(error.status).json({ error: `OpenAI error: ${error.name}` });
+        } else {
+            res.status(500).json({ error: `Failed due to: ${error.message}` });
+        }
     }
 });
+
 
 const PORT = 5000;
 app.listen(PORT, () => {
