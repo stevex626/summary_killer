@@ -42,15 +42,6 @@ app.post('/summarize', async (req, res) => {
         }
 
         const articleContent = stdout;
-        // Summarize using T5
-        // exec(`python t5_summarize.py "${articleContent}"`, async (t5Error, t5Output, t5Stderr) => {
-        //     if (t5Error) {
-        //         console.error(`T5 error: ${t5Error}`);
-        //         return res.status(500).json({ error: "Failed to summarize with T5" });
-        //     }
-
-        //     const summarizedContent = t5Output;
-
             // Further summarize using OpenAI
             try {
                 // const openaiResponse = await openaiInstance.chat.completions.create({
