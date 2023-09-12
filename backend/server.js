@@ -3,11 +3,9 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
-const OpenAI = require('openai');
 const { exec } = require("child_process");
 
 const app = express();
-const openaiInstance = new OpenAI();
 
 app.use(cors());
 app.use(express.json());
@@ -44,12 +42,6 @@ app.post('/summarize', async (req, res) => {
         const articleContent = stdout;
             // Further summarize using OpenAI
             try {
-                // const openaiResponse = await openaiInstance.chat.completions.create({
-                //     messages: [{ role: 'user', content: `Please summarize the following content: ${articleContent}` }],
-                //     model: 'gpt-3.5-turbo-0301',
-                //     max_tokens: 200,
-                // });
-                //const finalSummary = openaiResponse.choices[0];
                 console.log(articleContent)
                 res.json({ summary: articleContent });
             } catch (summaryError) {
