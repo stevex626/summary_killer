@@ -36,19 +36,27 @@ def nltk_summary(text):
                 else:
                     sentenceValue[sentence] = freq
 
-    #Average score value
+    # Adjust sentence scores based on position
+    total_sentences = len(sentences)
+    for i, sentence in enumerate(sentences):
+        positional_multiplier = 1 + 0.5 * (1 - abs(i - total_sentences/2) / (total_sentences/2))
+        sentenceValue[sentence] *= positional_multiplier
+
+    # Recompute the average after adjusting scores
     sumValues = 0
     for sentence in sentenceValue:
         sumValues += sentenceValue[sentence]
-
-    # Store sentences into the summary
     average = int(sumValues / len(sentenceValue))
+    
+    # Store sentences into the summary
     summary = ''
-
     for sentence in sentences:
         if (sentence in sentenceValue) and (sentenceValue[sentence] > (1.2 * average)):
-            summary += " " + sentence     
+            summary += " " + sentence
+     
     return summary
+
+
 
 def extract_content(url):
     article = Article(url)
