@@ -29,52 +29,49 @@ app.get('/', (req, res) => {
     res.sendFile('path_to_your/webscrape.html');
 });
 
-app.post('/fetch-article', (req, res) => {
+app.post('/summarize', async (req, res) => {
     const url = req.body.url;
 
     if (!url) return res.status(400).json({ error: "URL is missing" });
 
-    exec(`python3 fetch_article.py "${url}"`, (error, stdout, stderr) => {
+    // Preprocessing article text
+    exec(`python process_article.py "${url}"`, { maxBuffer: 1024 * 1024 }, async (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
             return res.status(500).json({ error: "Failed to fetch article content" });
         }
 
         const articleContent = stdout;
-        // Now you can further process this content or directly send it as a response
-        res.json({ content: articleContent });
+        // Summarize using T5
+        // exec(`python t5_summarize.py "${articleContent}"`, async (t5Error, t5Output, t5Stderr) => {
+        //     if (t5Error) {
+        //         console.error(`T5 error: ${t5Error}`);
+        //         return res.status(500).json({ error: "Failed to summarize with T5" });
+        //     }
+
+        //     const summarizedContent = t5Output;
+
+            // Further summarize using OpenAI
+            try {
+                // const openaiResponse = await openaiInstance.chat.completions.create({
+                //     messages: [{ role: 'user', content: `Please summarize the following content: ${articleContent}` }],
+                //     model: 'gpt-3.5-turbo-0301',
+                //     max_tokens: 200,
+                // });
+                //const finalSummary = openaiResponse.choices[0];
+                console.log(articleContent)
+                res.json({ summary: articleContent });
+            } catch (summaryError) {
+                if (summaryError instanceof OpenAI.APIError) {
+                    res.status(summaryError.status).json({ error: `OpenAI error: ${summaryError.name}` });
+                } else {
+                    res.status(500).json({ error: `Failed to summarize due to: ${summaryError.message}` });
+                }
+            }
+        });
     });
-});
 
-app.post('/summarize', async (req, res) => {
-    const text = req.body.text;
 
-    if (!text) return res.status(400).json({ error: "Content is missing" });
-
-    const truncatedText = truncateAtSentence(text, 4096);
-
-    if (!truncatedText) return res.status(400).json({ error: "Failed to extract meaningful content" });
-
-    try {
-        // const openaiResponse = await openaiInstance.completions.create({
-        //     model: 'text-davinci-003',
-        //     prompt: `Please summarize the following content: ${truncatedText}`,
-        //     max_tokens: 200,
-        //   });
-
-        //const summary = openaiResponse.choices[0].text;
-        const summary = text;
-        console.log(summary);
-        res.json({ summary });
-
-    } catch (error) {
-        if (error instanceof OpenAI.APIError) {
-            res.status(error.status).json({ error: `OpenAI error: ${error.name}` });
-        } else {
-            res.status(500).json({ error: `Failed due to: ${error.message}` });
-        }
-    }
-});
 
 const PORT = 5000;
 app.listen(PORT, () => {
