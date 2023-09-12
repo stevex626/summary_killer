@@ -1,18 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
-const openai = require('openai');
-require('dotenv').config();
+const OpenAI = require('openai');
 
 const app = express();
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY // Using the official initialization pattern
-});
-
-// Load environment variables
-openai.api_key = process.env.OPENAI_API_KEY;
+const openaiInstance = new OpenAI();
 
 app.use(cors());
 app.use(express.json());
@@ -31,43 +25,26 @@ const truncateAtSentence = (text, charLimit) => {
 }
 
 app.get('/', (req, res) => {
-    // You can send your HTML file here
     res.sendFile('path_to_your/webscrape.html');
 });
 
 app.post('/summarize', async (req, res) => {
-    const url = req.body.url;
+    const text = req.body.text;
 
-    if (!url) return res.status(400).json({ error: "URL is missing" });
+    if (!text) return res.status(400).json({ error: "Content is missing" });
 
-    const headers = {
-        "User-Agent": "Mozilla/5.0 ...",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Referer": "https://www.google.com/"
-    };
+    const truncatedText = truncateAtSentence(text, 4096);
+
+    if (!truncatedText) return res.status(400).json({ error: "Failed to extract meaningful content" });
 
     try {
-        const response = await axios.get(url, { headers });
-        const $ = cheerio.load(response.data);
-        const paragraphs = $('p').toArray().map(p => $(p).text()).join(' ');
+        const openaiResponse = await openaiInstance.completions.create({
+            model: 'text-davinci-003',
+            prompt: `Please summarize the following content: ${truncatedText}`,
+            max_tokens: 200,
+          });
 
-        const truncatedText = truncateAtSentence(paragraphs, 4096);
-
-        if (!truncatedText) return res.status(400).json({ error: "Failed to extract meaningful content" });
-
-        const openaiResponse = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            messages: [{
-                role: 'system',
-                content: `You are a helpful assistant.`
-            }, {
-                role: 'user',
-                content: `Please summarize the following content: ${truncatedText}`
-            }]
-        });
-
-        const summary = openaiResponse.choices[0]?.message?.content?.trim();
-
+        const summary = openaiResponse.choices[0].text;
         res.json({ summary });
 
     } catch (error) {
@@ -78,7 +55,6 @@ app.post('/summarize', async (req, res) => {
         }
     }
 });
-
 
 const PORT = 5000;
 app.listen(PORT, () => {
