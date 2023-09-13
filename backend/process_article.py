@@ -5,7 +5,8 @@ from newspaper import Article
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 import tiktoken
- 
+from bs4 import BeautifulSoup
+import requests
 
 def trim_content(content, max_tokens=1250, model="gpt-3.5-turbo-0301"):
     encoding = tiktoken.encoding_for_model(model)
@@ -72,16 +73,33 @@ def nltk_summary(text):
 
 
 
-def extract_content(url):
-    article = Article(url)
-    article.download()
-    article.parse()
+# def extract_content(url):
+#     article = Article(url)
+#     article.download()
+#     article.parse()
 
-    cleaned_text = re.sub(r'[^A-Za-z0-9.,?! ]+', ' ', article.text)
-    summarized_content = nltk_summary(cleaned_text)
-    final_content = trim_content(summarized_content)
+#     cleaned_text = re.sub(r'[^A-Za-z0-9.,?! ]+', ' ', article.text)
+#     summarized_content = nltk_summary(cleaned_text)
+#     final_content = trim_content(summarized_content)
 
-    return final_content
+#     return final_content
+
+def extract_content(url):    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.3",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Referer": "https://www.google.com/",
+    }
+
+    r = requests.get(url, headers=headers)
+    r.raise_for_status()
+
+    # Using BeautifulSoup to parse HTML and extract text
+    soup = BeautifulSoup(r.text, 'lxml')
+    paragraphs = soup.find_all('p')
+    text = " ".join(paragraph.text for paragraph in paragraphs)
+
+    return text
 
 if __name__ == "__main__":
     url = sys.argv[1]
