@@ -29,16 +29,14 @@ app.post('/summarize', async (req, res) => {
         }
 
         const articleContent = stdout;
-            // Further cleans up the summarization using OpenAI
-            // try {
-            //     const completion = await openai.chat.completions.create({
-            //         messages: [{ role: 'user', content: `Please correct any grammar and punctuation errors, enhance its readability, and try to maintain the existing information as closely as possible for the following content: ${articleContent}` }],
-            //         model: 'gpt-3.5-turbo-0301',
-            //         max_tokens: 750,
-            //       });
-            //     const summary = completion.choices[0].message.content;
-            try{
-                summary = articleContent
+            // API call to openAI chat model
+            try {
+                const completion = await openai.chat.completions.create({
+                    messages: [{ role: 'user', content: `Please summarize the following content, and be as accurate and comprehensive as possible, and make sure to have a logical flow in your response: ${articleContent}` }],
+                    model: 'gpt-3.5-turbo-0301',
+                    max_tokens: 750,
+                  });
+                const summary = completion.choices[0].message.content;
                 console.log(summary);
                 res.json({ summary: summary });
             } catch (summaryError) {
@@ -47,8 +45,7 @@ app.post('/summarize', async (req, res) => {
                 } else {
                     res.status(500).json({ error: `Failed to summarize due to: ${summaryError.message}` });
                 }
-            }
-        });
+        }});
     });
 
 
