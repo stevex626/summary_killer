@@ -4,6 +4,20 @@ import re
 from newspaper import Article
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
+import tiktoken
+ 
+
+def trim_content(content, max_tokens=1250, model="gpt-3.5-turbo-0301"):
+    encoding = tiktoken.encoding_for_model(model)
+    num_tokens = len(encoding.encode(content))
+    
+    while num_tokens > max_tokens:
+        cut_length = int(0.2 * len(content))
+        content = content[:-cut_length]  # Trim from the end
+        num_tokens = len(encoding.encode(content))
+    
+    return content
+
 
 def nltk_summary(text):
     nltk.download('stopwords')
@@ -65,8 +79,9 @@ def extract_content(url):
 
     cleaned_text = re.sub(r'[^A-Za-z0-9.,?! ]+', ' ', article.text)
     summarized_content = nltk_summary(cleaned_text)
-    
-    return summarized_content
+    final_content = trim_content(summarized_content)
+
+    return final_content
 
 if __name__ == "__main__":
     url = sys.argv[1]
