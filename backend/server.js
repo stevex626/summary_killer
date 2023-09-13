@@ -3,25 +3,14 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
+const openAI = require('openai');
 const { exec } = require("child_process");
 
 const app = express();
+const openai = new openAI();
 
 app.use(cors());
 app.use(express.json());
-
-const truncateAtSentence = (text, charLimit) => {
-    const truncatedText = text.slice(0, charLimit);
-    const lastPeriod = truncatedText.lastIndexOf('.');
-    const lastExclamation = truncatedText.lastIndexOf('!');
-    const lastQuestion = truncatedText.lastIndexOf('?');
-
-    const lastSentenceEnd = Math.max(lastPeriod, lastExclamation, lastQuestion);
-
-    if (lastSentenceEnd === -1) return truncatedText;
-
-    return truncatedText.slice(0, lastSentenceEnd + 1);
-}
 
 app.get('/', (req, res) => {
     res.sendFile('path_to_your/webscrape.html');
@@ -40,12 +29,20 @@ app.post('/summarize', async (req, res) => {
         }
 
         const articleContent = stdout;
-            // Further summarize using OpenAI
-            try {
-                console.log(articleContent)
-                res.json({ summary: articleContent });
+            // Further cleans up the summarization using OpenAI
+            // try {
+            //     const completion = await openai.chat.completions.create({
+            //         messages: [{ role: 'user', content: `Please correct any grammar and punctuation errors, enhance its readability, and try to maintain the existing information as closely as possible for the following content: ${articleContent}` }],
+            //         model: 'gpt-3.5-turbo-0301',
+            //         max_tokens: 750,
+            //       });
+            //     const summary = completion.choices[0].message.content;
+            try{
+                summary = articleContent
+                console.log(summary);
+                res.json({ summary: summary });
             } catch (summaryError) {
-                if (summaryError instanceof OpenAI.APIError) {
+                if (summaryError instanceof openAI.APIError) {
                     res.status(summaryError.status).json({ error: `OpenAI error: ${summaryError.name}` });
                 } else {
                     res.status(500).json({ error: `Failed to summarize due to: ${summaryError.message}` });
