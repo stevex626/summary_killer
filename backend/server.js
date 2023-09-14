@@ -37,7 +37,6 @@ app.post('/summarize', async (req, res) => {
                     max_tokens: 250,
                   });
                 const summary = completion.choices[0].message.content;
-                console.log(summary);
                 res.json({ summary: summary });
             } catch (summaryError) {
                 if (summaryError instanceof openAI.APIError) {

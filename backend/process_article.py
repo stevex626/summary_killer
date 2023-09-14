@@ -6,8 +6,9 @@ import requests
 
 def trim_content(content, max_tokens=3845, model="gpt-3.5-turbo-0301"):
     encoding = tiktoken.encoding_for_model(model)
+    content = content.replace('\n', ' ')
     num_tokens = len(encoding.encode(content))
-    
+
     while num_tokens > max_tokens:
         cut_length = int(0.05 * len(content))
         
@@ -17,7 +18,6 @@ def trim_content(content, max_tokens=3845, model="gpt-3.5-turbo-0301"):
         num_tokens = len(encoding.encode(content))
 
     # Replace newline characters with spaces
-    content = content.replace('\n', ' ')
     return content
 
 def extract_content(url):    
