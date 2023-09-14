@@ -9,10 +9,15 @@ def trim_content(content, max_tokens=3845, model="gpt-3.5-turbo-0301"):
     num_tokens = len(encoding.encode(content))
     
     while num_tokens > max_tokens:
-        cut_length = int(0.2 * len(content))
-        content = content[:-cut_length]  # Trim from the end
+        cut_length = int(0.05 * len(content))
+        
+        # Trim 5% from the beginning and 5% from the end
+        content = content[cut_length:-cut_length]
+        
         num_tokens = len(encoding.encode(content))
-    
+
+    # Replace newline characters with spaces
+    content = content.replace('\n', ' ')
     return content
 
 def extract_content(url):    
@@ -47,7 +52,6 @@ def extract_content(url):
 
     # If the text is very lengthy, trim it
     text = trim_content(text)
-
     return text
 
 

@@ -29,8 +29,6 @@ app.post('/summarize', async (req, res) => {
         }
 
         const articleContent = stdout.toString('utf-8').trim();
-        console.log(articleContent);
-            // API call to openAI chat model
             try {
                 const completion = await openai.chat.completions.create({
                     messages: [{ role: 'user', content: `Please summarize the following content, and be as accurate and comprehensive as possible, and make sure to have a logical flow in your response
