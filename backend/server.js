@@ -29,10 +29,12 @@ app.post('/summarize', async (req, res) => {
         }
 
         const articleContent = stdout;
+        console.log(articleContent);
             // API call to openAI chat model
             try {
                 const completion = await openai.chat.completions.create({
-                    messages: [{ role: 'user', content: `Please summarize the following content, and be as accurate and comprehensive as possible, and make sure to have a logical flow in your response: ${articleContent}` }],
+                    messages: [{ role: 'user', content: `Please summarize the following content, and be as accurate and comprehensive as possible, and make sure to have a logical flow in your response
+                    . If it is a different language, translate the context and return the summary in the translated language. Here is the content to be summarized: ${articleContent}` }],
                     model: 'gpt-3.5-turbo-0301',
                     max_tokens: 750,
                   });
