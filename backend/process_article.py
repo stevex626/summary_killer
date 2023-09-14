@@ -45,9 +45,6 @@ def extract_content(url):
         elements = soup.find_all(class_=class_name)
         text += " ".join(el.text for el in elements)
 
-    # Optional: clean the text if necessary
-    # text = re.sub(r'[^\w.,?! ]+', ' ', text, flags=re.UNICODE)
-
     # If the text is very lengthy, trim it
     text = trim_content(text)
 
