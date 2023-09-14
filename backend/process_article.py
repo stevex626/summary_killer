@@ -4,7 +4,7 @@ import tiktoken
 from bs4 import BeautifulSoup
 import requests
 
-def trim_content(content, max_tokens=4096, model="gpt-3.5-turbo-0301"):
+def trim_content(content, max_tokens=3845, model="gpt-3.5-turbo-0301"):
     encoding = tiktoken.encoding_for_model(model)
     num_tokens = len(encoding.encode(content))
     
@@ -15,8 +15,6 @@ def trim_content(content, max_tokens=4096, model="gpt-3.5-turbo-0301"):
     
     return content
 
-
-
 def extract_content(url):    
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.3",
@@ -26,17 +24,36 @@ def extract_content(url):
 
     r = requests.get(url, headers=headers)
     r.raise_for_status()
+    r.encoding = 'utf-8'  # Ensure the encoding is set to utf-8
 
     # Using BeautifulSoup to parse HTML and extract text
     soup = BeautifulSoup(r.text, 'lxml')
-    paragraphs = soup.find_all('p')
-    text = " ".join(paragraph.text for paragraph in paragraphs)
 
-    cleaned_text = re.sub(r'[^A-Za-z0-9.,?! ]+', ' ', text)
-    final_text = trim_content(cleaned_text)
+    # List of common tags and classes for main content
+    common_tags = ['p', 'div', 'article']
+    common_classes = ['article-paragraph', 'content', 'post-body']
 
-    return final_text
+    text = ''
+
+    # Extract text from common tags
+    for tag in common_tags:
+        elements = soup.find_all(tag)
+        text += " ".join(el.text for el in elements)
+
+    # Extract text from common classes
+    for class_name in common_classes:
+        elements = soup.find_all(class_=class_name)
+        text += " ".join(el.text for el in elements)
+
+    # Optional: clean the text if necessary
+    # text = re.sub(r'[^\w.,?! ]+', ' ', text, flags=re.UNICODE)
+
+    # If the text is very lengthy, trim it
+    text = trim_content(text)
+
+    return text
+
 
 if __name__ == "__main__":
     url = sys.argv[1]
-    print(extract_content(url))
+    sys.stdout.buffer.write(extract_content(url).encode('utf-8'))
