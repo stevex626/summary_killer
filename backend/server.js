@@ -41,6 +41,7 @@ app.post('/verifyToken', async (req, res) => {
             idToken: req.body.idToken,
             requiredAudience: process.env.CLIENT_ID,
         });
+        // Getting userid and email
         const payload = ticket.getPayload();
         const userid = payload['sub'];
         const email = payload['email'];

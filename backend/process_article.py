@@ -1,5 +1,4 @@
 import sys
-import re
 import tiktoken
 from bs4 import BeautifulSoup
 import requests
