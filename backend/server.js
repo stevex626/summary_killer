@@ -5,6 +5,7 @@ const openAI = require('openai');
 const { exec } = require("child_process");
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client();
+const mongoose = require("mongoose");
 
 const app = express();
 const openai = new openAI();
@@ -12,12 +13,29 @@ const openai = new openAI();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.sendFile('path_to_your/webscrape.html');
+const db_link = process.env.DATABASE_LINK;
+
+mongoose.connect(`${db_link}/SummaryKillerDB`, { useNewUrlParser: true});
+
+
+const Schema = mongoose.Schema;
+
+const userSchema = new Schema({
+  userid: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  }
 });
 
+const User = mongoose.model('User', userSchema);
+
 app.post('/verifyToken', async (req, res) => {
-    console.log(req.body.idToken);
     try {
         const ticket = await client.verifyIdToken({
             idToken: req.body.idToken,
@@ -27,6 +45,18 @@ app.post('/verifyToken', async (req, res) => {
         const userid = payload['sub'];
         const email = payload['email'];
  
+        // Check if the user already exists in the database
+        let user = await User.findOne({ userid: userid });
+
+        // If user doesn't exist, create a new one
+        if (!user) {
+            user = new User({
+                userid: userid,
+                email: email
+            });
+            await user.save();  // Save the user to the database
+        }
+
         res.json({message: 'Successfully authenticated'});
     } catch (error) {
         console.error("Detailed Error:", error);
