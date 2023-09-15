@@ -1,10 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
-const cheerio = require('cheerio');
 const cors = require('cors');
 const openAI = require('openai');
 const { exec } = require("child_process");
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client();
 
 const app = express();
 const openai = new openAI();
@@ -14,6 +14,27 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
     res.sendFile('path_to_your/webscrape.html');
+});
+
+app.post('/verifyToken', async (req, res) => {
+    console.log(req.body.idToken);
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: req.body.idToken,
+            requiredAudience: process.env.CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const userid = payload['sub'];
+        const email = payload['email'];
+        const name = payload['name'];
+        console.log("Verified user: " + email);
+        console.log("Verified user: " + userid);
+
+        res.json({message: 'Successfully authenticated'});
+    } catch (error) {
+        console.error("Detailed Error:", error);
+        res.status(401).json({error: 'Authentication failed'});
+    }
 });
 
 app.post('/summarize', async (req, res) => {
