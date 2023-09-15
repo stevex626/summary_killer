@@ -26,10 +26,7 @@ app.post('/verifyToken', async (req, res) => {
         const payload = ticket.getPayload();
         const userid = payload['sub'];
         const email = payload['email'];
-        const name = payload['name'];
-        console.log("Verified user: " + email);
-        console.log("Verified user: " + userid);
-
+ 
         res.json({message: 'Successfully authenticated'});
     } catch (error) {
         console.error("Detailed Error:", error);
