@@ -1,4 +1,4 @@
-beautifulsoup4==4.12.2
+beautifulsoup4==4.9.3
 lxml==4.9.3
-requests==2.29.0
-tiktoken==0.4.0
+requests==2.27.1
+tiktoken==0.5.1
