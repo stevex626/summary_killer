@@ -13,8 +13,6 @@ COPY server.js .
 RUN npm install
 
 RUN apt-get update && apt-get install -y python3-pip
-# Upgrade pip3
-RUN pip3 install --upgrade pip
 
 # Copy over and install the Python dependencies
 COPY requirements.txt .
