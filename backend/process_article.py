@@ -21,7 +21,7 @@ def trim_content(content, max_tokens=3845, model="gpt-3.5-turbo-0301"):
 
 def extract_content(url):    
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.3",
+        "User-Agent": "Chrome/89.0.4389.82",
         "Accept-Language": "en-US,en;q=0.5",
         "Referer": "https://www.google.com/",
     }

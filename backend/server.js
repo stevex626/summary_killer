@@ -60,7 +60,6 @@ app.post('/verifyToken', async (req, res) => {
 
         res.json({message: 'Successfully authenticated'});
     } catch (error) {
-        console.error("Detailed Error:", error);
         res.status(401).json({error: 'Authentication failed'});
     }
 });
@@ -71,9 +70,8 @@ app.post('/summarize', async (req, res) => {
     if (!url) return res.status(400).json({ error: "URL is missing" });
 
     // Preprocessing article text
-    exec(`python process_article.py "${url}"`, { maxBuffer: 1024 * 1024 }, async (error, stdout, stderr) => {
+    exec(`python process_article.py "${url}"`, async (error, stdout, stderr) => {
         if (error) {
-            console.error(`exec error: ${error}`);
             return res.status(500).json({ error: "Failed to fetch article content" });
         }
 
@@ -86,8 +84,7 @@ app.post('/summarize', async (req, res) => {
                     max_tokens: 250,
                   });
                 const summary = completion.choices[0].message.content;
-                console.log(articleContent)
-                res.json({ summary: articleContent });
+                res.json({ summary: summary });
             } catch (summaryError) {
                 if (summaryError instanceof openAI.APIError) {
                     res.status(summaryError.status).json({ error: `OpenAI error: ${summaryError.name}, ${summaryError.message}` });
