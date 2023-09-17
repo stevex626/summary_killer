@@ -79,13 +79,13 @@ app.post('/summarize', async (req, res) => {
 
         const articleContent = stdout.toString('utf-8').trim();
             try {
-                // const completion = await openai.chat.completions.create({
-                //     messages: [{ role: 'user', content: `Please summarize the following content, and be as accurate and comprehensive as possible, and make sure to have a logical flow in your response
-                //     . If it is a different language, translate the context and return the summary in English. Here is the content to be summarized: ${articleContent}` }],
-                //     model: 'gpt-3.5-turbo-0301',
-                //     max_tokens: 250,
-                //   });
-                // const summary = completion.choices[0].message.content;
+                const completion = await openai.chat.completions.create({
+                    messages: [{ role: 'user', content: `Please summarize the following content, and be as accurate and comprehensive as possible, and make sure to have a logical flow in your response
+                    . If it is a different language, translate the context and return the summary in English. Here is the content to be summarized: ${articleContent}` }],
+                    model: 'gpt-3.5-turbo-0301',
+                    max_tokens: 250,
+                  });
+                const summary = completion.choices[0].message.content;
                 console.log(articleContent)
                 res.json({ summary: articleContent });
             } catch (summaryError) {
