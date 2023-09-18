@@ -70,9 +70,9 @@ app.post('/summarize', async (req, res) => {
     if (!url) return res.status(400).json({ error: "URL is missing" });
 
     // Preprocessing article text
-    exec(`python process_article.py "${url}"`, async (error, stdout, stderr) => {
+    exec(`python3 process_article.py "${url}"`, async (error, stdout, stderr) => {
         if (error) {
-            return res.status(500).json({ error: "Failed to fetch article content" });
+            return res.status(500).json({ error: `Failed to fetch article content: ${stderr}` });
         }
 
         const articleContent = stdout.toString('utf-8').trim();
