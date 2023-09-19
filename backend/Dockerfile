@@ -30,10 +30,12 @@ RUN wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz && \
 
 # Set pip3.11 as the default pip version
 RUN ln -s /usr/local/bin/pip3.11 /usr/local/bin/pip3
+RUN ln -s /usr/local/bin/python3.11 /usr/local/bin/python3
+
 
 # Copy over and install the Python dependencies
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip3.11 install -r requirements.txt
 
 # Cleanup to reduce image size
 RUN apt-get remove --purge -y wget build-essential && \

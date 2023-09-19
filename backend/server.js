@@ -41,21 +41,19 @@ app.post('/verifyToken', async (req, res) => {
             idToken: req.body.idToken,
             requiredAudience: process.env.CLIENT_ID,
         });
-        // Getting userid and email
+
         const payload = ticket.getPayload();
         const userid = payload['sub'];
         const email = payload['email'];
- 
-        // Check if the user already exists in the database
+
         let user = await User.findOne({ userid: userid });
 
-        // If user doesn't exist, create a new one
         if (!user) {
             user = new User({
                 userid: userid,
                 email: email
             });
-            await user.save();  // Save the user to the database
+            await user.save();
         }
 
         res.json({message: 'Successfully authenticated'});
@@ -69,7 +67,6 @@ app.post('/summarize', async (req, res) => {
 
     if (!url) return res.status(400).json({ error: "URL is missing" });
 
-    // Preprocessing article text
     exec(`python3 process_article.py "${url}"`, async (error, stdout, stderr) => {
         if (error) {
             return res.status(500).json({ error: `Failed to fetch article content: ${stderr}` });
@@ -87,9 +84,11 @@ app.post('/summarize', async (req, res) => {
                 res.json({ summary: summary });
             } catch (summaryError) {
                 if (summaryError instanceof openAI.APIError) {
-                    res.status(summaryError.status).json({ error: `OpenAI error: ${summaryError.name}, ${summaryError.message}` });
-                } else {
-                    res.status(500).json({ error: `Failed to summarize due to: ${summaryError.message}` });
+                    let errorMessage = `OpenAI error: ${summaryError.name}, ${summaryError.message}`;
+                    if (summaryError.message.includes("Content length")) { 
+                        errorMessage = "Content is too long to summarize";
+                    }
+                    res.status(summaryError.status).json({ error: errorMessage });
                 }
         }});
     });
