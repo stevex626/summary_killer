@@ -67,7 +67,7 @@ app.post('/summarize', async (req, res) => {
 
     if (!url) return res.status(400).json({ error: "URL is missing" });
 
-    exec(`python3 process_article.py "${url}"`, async (error, stdout, stderr) => {
+    exec(`python process_article.py "${url}"`, async (error, stdout, stderr) => {
         if (error) {
             return res.status(500).json({ error: `Failed to fetch article content: ${stderr}` });
         }
@@ -76,7 +76,7 @@ app.post('/summarize', async (req, res) => {
             try {
                 const completion = await openai.chat.completions.create({
                     messages: [{ role: 'user', content: `Please summarize the following content, and be as accurate and comprehensive as possible, and make sure to have a logical flow in your response
-                    . If it is a different language, translate the context and return the summary in English. Here is the content to be summarized: ${articleContent}` }],
+                    . If it is a different language, translate the context and return the summary in English. Ignore any ads. Here is the content to be summarized: ${articleContent}` }],
                     model: 'gpt-3.5-turbo-0301',
                     max_tokens: 250,
                   });
