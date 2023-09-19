@@ -28,15 +28,14 @@ RUN wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz && \
     rm -rf Python-3.11.5 && \
     rm Python-3.11.5.tgz
 
-# Rename existing python to avoid conflicts and Set python3.11.5 as the default Python version
-# RUN mv /usr/bin/python /usr/bin/python_old && ln -sf /usr/local/bin/python3.11.5 /usr/bin/python
-
 # Set pip3.11 as the default pip version
 RUN ln -s /usr/local/bin/pip3.11 /usr/local/bin/pip3
+RUN ln -s /usr/local/bin/python3.11 /usr/local/bin/python3
+
 
 # Copy over and install the Python dependencies
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip3.11 install -r requirements.txt
 
 # Cleanup to reduce image size
 RUN apt-get remove --purge -y wget build-essential && \
