@@ -6,6 +6,8 @@ const { exec } = require("child_process");
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client();
 const mongoose = require("mongoose");
+const https = require('https');
+const fs = require('fs');
 
 const app = express();
 const openai = new openAI();
@@ -34,6 +36,14 @@ const userSchema = new Schema({
 });
 
 const User = mongoose.model('User', userSchema);
+
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/www.summarykiller.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/www.summarykiller.com/fullchain.pem', 'utf8');
+
+
+const credentials = { key: privateKey, cert: certificate };
+const httpsServer = https.createServer(credentials, app);
+
 
 app.post('/verifyToken', async (req, res) => {
     try {
@@ -95,7 +105,7 @@ app.post('/summarize', async (req, res) => {
 
 
 
-const PORT = 5000;
-app.listen(PORT, () => {
+const PORT = 443;
+httpsServer.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
 });
